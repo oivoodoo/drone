@@ -3,7 +3,6 @@ package notify
 import (
 	"encoding/json"
 	"fmt"
-	"net/url"
 )
 
 const (
@@ -36,30 +35,21 @@ func (s *Slack) Send(context *Context) error {
 	return nil
 }
 
-func getBuildUrl(context *Context) string {
-	branchQuery := url.Values{}
-	if context.Commit.Branch != "" {
-		branchQuery.Set("branch", context.Commit.Branch)
-	}
-
-	return fmt.Sprintf("%s/%s/commit/%s?%s", context.Host, context.Repo.Slug, context.Commit.Hash, branchQuery.Encode())
-}
-
-func getMessage(context *Context, message string) string {
+func getSlackMessage(context *Context, message string) string {
 	url := getBuildUrl(context)
 	return fmt.Sprintf(message, context.Repo.Name, url, context.Commit.HashShort(), context.Commit.Author)
 }
 
 func (s *Slack) sendStarted(context *Context) error {
-	return s.send(getMessage(context, slackStartedMessage))
+	return s.send(getSlackMessage(context, slackStartedMessage))
 }
 
 func (s *Slack) sendSuccess(context *Context) error {
-	return s.send(getMessage(context, slackSuccessMessage))
+	return s.send(getSlackMessage(context, slackSuccessMessage))
 }
 
 func (s *Slack) sendFailure(context *Context) error {
-	return s.send(getMessage(context, slackFailureMessage))
+	return s.send(getSlackMessage(context, slackFailureMessage))
 }
 
 // helper function to send HTTP requests
